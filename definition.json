@@ -1,0 +1,5 @@
+{
+  "connectionClass": [
+    "Fusio\\Adapter\\Smtp\\Connection\\Smtp"
+  ]
+}
