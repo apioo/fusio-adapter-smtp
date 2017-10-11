@@ -46,7 +46,17 @@ class Smtp implements ConnectionInterface
      */
     public function getConnection(ParametersInterface $config)
     {
-        $transport = \Swift_SmtpTransport::newInstance($config->get('host'), $config->get('port'));
+        $host = $config->get('host');
+        if (empty($host)) {
+            $host = 'localhost';
+        }
+
+        $port = (int) $config->get('port');
+        if (empty($port)) {
+            $port = 25;
+        }
+
+        $transport = \Swift_SmtpTransport::newInstance($host, $port);
 
         $encryption = $config->get('encryption');
         if (in_array($encryption, ['tls', 'ssl'])) {
