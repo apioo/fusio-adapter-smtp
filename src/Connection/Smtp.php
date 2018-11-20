@@ -76,6 +76,10 @@ class Smtp implements ConnectionInterface
         return \Swift_Mailer::newInstance($transport);
     }
 
+    /**
+     * @param \Fusio\Engine\Form\BuilderInterface $builder
+     * @param \Fusio\Engine\Form\ElementFactoryInterface $elementFactory
+     */
     public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory)
     {
         $builder->add($elementFactory->newInput('host', 'Host', 'text', 'SMTP host'));
