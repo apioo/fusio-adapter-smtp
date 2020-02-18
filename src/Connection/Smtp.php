@@ -56,7 +56,7 @@ class Smtp implements ConnectionInterface
             $port = 25;
         }
 
-        $transport = \Swift_SmtpTransport::newInstance($host, $port);
+        $transport = new \Swift_SmtpTransport($host, $port);
 
         $encryption = $config->get('encryption');
         if (in_array($encryption, ['tls', 'ssl'])) {
@@ -73,7 +73,7 @@ class Smtp implements ConnectionInterface
             $transport->setPassword($password);
         }
 
-        return \Swift_Mailer::newInstance($transport);
+        return new \Swift_Mailer($transport);
     }
 
     /**

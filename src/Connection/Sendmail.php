@@ -48,12 +48,12 @@ class Sendmail implements ConnectionInterface
     {
         $command = $config->get('command');
         if (!empty($command)) {
-            $transport = \Swift_SendmailTransport::newInstance($command);
+            $transport = new \Swift_SendmailTransport($command);
         } else {
-            $transport = \Swift_SendmailTransport::newInstance();
+            $transport = new \Swift_SendmailTransport();
         }
 
-        return \Swift_Mailer::newInstance($transport);
+        return new \Swift_Mailer($transport);
     }
 
     /**
