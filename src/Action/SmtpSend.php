@@ -28,6 +28,9 @@ use Fusio\Engine\Form\BuilderInterface;
 use Fusio\Engine\Form\ElementFactoryInterface;
 use Fusio\Engine\ParametersInterface;
 use Fusio\Engine\RequestInterface;
+use PSX\Http\Environment\HttpResponseInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
 
 /**
  * Action which allows you to create an API endpoint based on any database
@@ -35,36 +38,37 @@ use Fusio\Engine\RequestInterface;
  *
  * @author  Christoph Kappestein <christoph.kappestein@gmail.com>
  * @license http://www.gnu.org/licenses/agpl-3.0
- * @link    http://fusio-project.org
+ * @link    https://www.fusio-project.org/
  */
 class SmtpSend extends ActionAbstract
 {
-    public function getName()
+    public function getName(): string
     {
         return 'SMTP-Send';
     }
 
-    public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context)
+    public function handle(RequestInterface $request, ParametersInterface $configuration, ContextInterface $context): HttpResponseInterface
     {
         $connection = $this->getConnection($configuration);
 
-        $message = (new \Swift_Message($request->get('subject')));
-        $message->setTo($request->get('to'));
-        $message->setBody($request->get('body'));
+        $message = (new Email())
+            ->subject($request->get('subject'))
+            ->to($request->get('to'))
+            ->html($request->get('body'));
 
         $from = $request->get('from');
         if (!empty($from)) {
-            $message->setFrom($from);
+            $message->from($from);
         }
 
         $cc = $request->get('cc');
         if (!empty($cc)) {
-            $message->setCc($cc);
+            $message->cc($cc);
         }
 
         $bcc = $request->get('bcc');
         if (!empty($bcc)) {
-            $message->setBcc($bcc);
+            $message->bcc($bcc);
         }
 
         $connection->send($message);
@@ -75,15 +79,15 @@ class SmtpSend extends ActionAbstract
         ]);
     }
 
-    public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory)
+    public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory): void
     {
         $builder->add($elementFactory->newConnection('connection', 'Connection', 'The SMTP connection which should be used'));
     }
 
-    protected function getConnection(ParametersInterface $configuration): \Swift_Mailer
+    protected function getConnection(ParametersInterface $configuration): Mailer
     {
         $connection = $this->connector->getConnection($configuration->get('connection'));
-        if (!$connection instanceof \Swift_Mailer) {
+        if (!$connection instanceof Mailer) {
             throw new ConfigurationException('Given connection must be a Swift_Mailer connection');
         }
 

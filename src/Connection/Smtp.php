@@ -3,7 +3,7 @@
  * Fusio
  * A web-application to create dynamically RESTful APIs
  *
- * Copyright (C) 2015-2018 Christoph Kappestein <christoph.kappestein@gmail.com>
+ * Copyright (C) 2015-2022 Christoph Kappestein <christoph.kappestein@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,67 +25,30 @@ use Fusio\Engine\ConnectionInterface;
 use Fusio\Engine\Form\BuilderInterface;
 use Fusio\Engine\Form\ElementFactoryInterface;
 use Fusio\Engine\ParametersInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport;
 
 /**
  * Smtp
  *
  * @author  Christoph Kappestein <christoph.kappestein@gmail.com>
  * @license http://www.gnu.org/licenses/agpl-3.0
- * @link    http://fusio-project.org
+ * @link    https://www.fusio-project.org/
  */
 class Smtp implements ConnectionInterface
 {
-    public function getName()
+    public function getName(): string
     {
         return 'SMTP';
     }
 
-    /**
-     * @param \Fusio\Engine\ParametersInterface $config
-     * @return \Swift_Mailer
-     */
-    public function getConnection(ParametersInterface $config)
+    public function getConnection(ParametersInterface $config): Mailer
     {
-        $host = $config->get('host');
-        if (empty($host)) {
-            $host = 'localhost';
-        }
-
-        $port = (int) $config->get('port');
-        if (empty($port)) {
-            $port = 25;
-        }
-
-        $transport = new \Swift_SmtpTransport($host, $port);
-
-        $encryption = $config->get('encryption');
-        if (in_array($encryption, ['tls', 'ssl'])) {
-            $transport->setEncryption($encryption);
-        }
-
-        $username = $config->get('username');
-        if (!empty($username)) {
-            $transport->setUsername($username);
-        }
-
-        $password = $config->get('password');
-        if (!empty($password)) {
-            $transport->setPassword($password);
-        }
-
-        return new \Swift_Mailer($transport);
+        return new Mailer(Transport::fromDsn($config->get('dsn')));
     }
 
-    /**
-     * @param \Fusio\Engine\Form\BuilderInterface $builder
-     * @param \Fusio\Engine\Form\ElementFactoryInterface $elementFactory
-     */
-    public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory)
+    public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory): void
     {
-        $builder->add($elementFactory->newInput('host', 'Host', 'text', 'SMTP host'));
-        $builder->add($elementFactory->newInput('port', 'Port', 'number', 'SMTP port'));
-        $builder->add($elementFactory->newInput('username', 'Username', 'text', 'Optional SMTP username'));
-        $builder->add($elementFactory->newInput('password', 'Password', 'text', 'Optional SMTP password'));
-        $builder->add($elementFactory->newSelect('encryption', 'Encryption', ['none' => 'None', 'tls' => 'TLS', 'ssl' => 'SSL'], ''));
+        $builder->add($elementFactory->newInput('dsn', 'DSN', 'text', 'The Mailer DSN. CLick <a href="https://symfony.com/doc/current/mailer.html#using-built-in-transports">here</a> for more information.'));
     }
 }
