@@ -29,6 +29,7 @@ use Fusio\Engine\Form\Element\Select;
 use Fusio\Engine\Parameters;
 use Fusio\Engine\Test\EngineTestCaseTrait;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Mailer\Mailer;
 
 /**
  * SmtpTest
@@ -43,21 +44,15 @@ class SmtpTest extends TestCase
 
     public function testGetConnection()
     {
-        /** @var Smtp $connection */
         $connection = $this->getConnectionFactory()->factory(Smtp::class);
 
         $config = new Parameters([
-            'host'       => 'localhost',
-            'port'       => '25',
-            'username'   => 'user',
-            'password'   => 'pw',
-            'encryption' => 'tls',
+            'dsn' => 'native://default',
         ]);
 
         $smtp = $connection->getConnection($config);
 
-        $this->assertInstanceOf(\Swift_Mailer::class, $smtp);
-        $this->assertInstanceOf(\Swift_SmtpTransport::class, $smtp->getTransport());
+        $this->assertInstanceOf(Mailer::class, $smtp);
     }
 
     public function testConfigure()
@@ -70,12 +65,8 @@ class SmtpTest extends TestCase
 
         $this->assertInstanceOf(Container::class, $builder->getForm());
 
-        $elements = $builder->getForm()->getProperty('element');
-        $this->assertEquals(5, count($elements));
+        $elements = $builder->getForm()->getElements();
+        $this->assertEquals(1, count($elements));
         $this->assertInstanceOf(Input::class, $elements[0]);
-        $this->assertInstanceOf(Input::class, $elements[1]);
-        $this->assertInstanceOf(Input::class, $elements[2]);
-        $this->assertInstanceOf(Input::class, $elements[3]);
-        $this->assertInstanceOf(Select::class, $elements[4]);
     }
 }
