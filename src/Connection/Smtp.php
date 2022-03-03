@@ -49,6 +49,6 @@ class Smtp implements ConnectionInterface
 
     public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory): void
     {
-        $builder->add($elementFactory->newInput('dsn', 'DSN', 'text', 'The Mailer DSN. CLick <a href="https://symfony.com/doc/current/mailer.html#using-built-in-transports">here</a> for more information.'));
+        $builder->add($elementFactory->newInput('dsn', 'DSN', 'text', 'The Mailer DSN'));
     }
 }
