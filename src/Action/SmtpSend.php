@@ -33,8 +33,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
 /**
- * Action which allows you to create an API endpoint based on any database
- * table
+ * SmtpSend
  *
  * @author  Christoph Kappestein <christoph.kappestein@gmail.com>
  * @license http://www.gnu.org/licenses/agpl-3.0
@@ -88,7 +87,7 @@ class SmtpSend extends ActionAbstract
     {
         $connection = $this->connector->getConnection($configuration->get('connection'));
         if (!$connection instanceof Mailer) {
-            throw new ConfigurationException('Given connection must be a Swift_Mailer connection');
+            throw new ConfigurationException('Given connection must be a Mailer connection');
         }
 
         return $connection;
