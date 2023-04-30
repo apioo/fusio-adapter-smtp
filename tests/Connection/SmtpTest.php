@@ -3,7 +3,7 @@
  * Fusio
  * A web-application to create dynamically RESTful APIs
  *
- * Copyright (C) 2015-2022 Christoph Kappestein <christoph.kappestein@gmail.com>
+ * Copyright (C) 2015-2023 Christoph Kappestein <christoph.kappestein@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -22,13 +22,11 @@
 namespace Fusio\Adapter\Smtp\Tests\Action;
 
 use Fusio\Adapter\Smtp\Connection\Smtp;
+use Fusio\Adapter\Smtp\Tests\SmtpTestCase;
 use Fusio\Engine\Form\Builder;
 use Fusio\Engine\Form\Container;
 use Fusio\Engine\Form\Element\Input;
-use Fusio\Engine\Form\Element\Select;
 use Fusio\Engine\Parameters;
-use Fusio\Engine\Test\EngineTestCaseTrait;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Mailer\Mailer;
 
 /**
@@ -38,10 +36,8 @@ use Symfony\Component\Mailer\Mailer;
  * @license http://www.gnu.org/licenses/agpl-3.0
  * @link    https://www.fusio-project.org/
  */
-class SmtpTest extends TestCase
+class SmtpTest extends SmtpTestCase
 {
-    use EngineTestCaseTrait;
-
     public function testGetConnection()
     {
         $connection = $this->getConnectionFactory()->factory(Smtp::class);

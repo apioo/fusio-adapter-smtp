@@ -1,8 +1,0 @@
-{
-  "actionClass": [
-    "Fusio\\Adapter\\Smtp\\Action\\SmtpSend"
-  ],
-  "connectionClass": [
-    "Fusio\\Adapter\\Smtp\\Connection\\Smtp"
-  ]
-}
