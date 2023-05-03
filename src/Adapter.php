@@ -34,6 +34,6 @@ class Adapter implements AdapterInterface
 {
     public function getContainerFile(): string
     {
-        return __DIR__ . '/../definition.json';
+        return __DIR__ . '/../resources/container.php';
     }
 }
