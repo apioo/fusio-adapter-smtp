@@ -26,10 +26,13 @@ use Fusio\Engine\Exception\ConfigurationException;
 use Fusio\Engine\Form\BuilderInterface;
 use Fusio\Engine\Form\ElementFactoryInterface;
 use Fusio\Engine\ParametersInterface;
+use Fusio\Engine\Request\HttpRequestContext;
 use Fusio\Engine\RequestInterface;
 use PSX\Http\Environment\HttpResponseInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 
 /**
  * SmtpSend
@@ -49,22 +52,52 @@ class SmtpSend extends ActionAbstract
     {
         $connection = $this->getConnection($configuration);
 
-        $message = (new Email())
-            ->subject($request->get('subject'))
-            ->to($request->get('to'))
-            ->html($request->get('body'));
+        $body = $configuration->get('body');
+        if (empty($body)) {
+            $subject = $request->get('subject');
+            $to = $request->get('to');
+            $cc = $request->get('cc');
+            $bcc = $request->get('bcc');
+            $from = $request->get('from');
+            $body = $request->get('body');
+        } else {
+            $subject = $configuration->get('subject');
+            $to = $configuration->get('to');
+            $cc = $configuration->get('cc');
+            $bcc = $configuration->get('bcc');
+            $from = $configuration->get('from');
+            $body = $this->buildBody($request, $body);
 
-        $from = $request->get('from');
+            if (empty($to)) {
+                $context->getUser()->getEmail();
+            }
+        }
+
+        if (empty($subject)) {
+            throw new ConfigurationException('No subject configured');
+        }
+
+        if (empty($to)) {
+            throw new ConfigurationException('No to configured');
+        }
+
+        if (empty($body)) {
+            throw new ConfigurationException('No body configured');
+        }
+
+        $message = (new Email())
+            ->subject($subject)
+            ->to($to)
+            ->html($body);
+
         if (!empty($from)) {
             $message->from($from);
         }
 
-        $cc = $request->get('cc');
         if (!empty($cc)) {
             $message->cc($cc);
         }
 
-        $bcc = $request->get('bcc');
         if (!empty($bcc)) {
             $message->bcc($bcc);
         }
@@ -73,13 +106,19 @@ class SmtpSend extends ActionAbstract
 
         return $this->response->build(200, [], [
             'success' => true,
-            'message' => 'Mail successful send',
+            'message' => 'Mail successfully send',
         ]);
     }
 
     public function configure(BuilderInterface $builder, ElementFactoryInterface $elementFactory): void
     {
         $builder->add($elementFactory->newConnection('connection', 'Connection', 'The SMTP connection which should be used'));
+        $builder->add($elementFactory->newInput('to', 'To', 'text', 'The receiver of this mail, if empty we try to send the email to the authenticated user'));
+        $builder->add($elementFactory->newInput('cc', 'CC', 'text', 'Optional CC receiver'));
+        $builder->add($elementFactory->newInput('bcc', 'BCC', 'text', 'Optional BCC receiver'));
+        $builder->add($elementFactory->newInput('from', 'From', 'text', 'Optional the from address'));
+        $builder->add($elementFactory->newInput('subject', 'Subject', 'text', 'The subject of this mail'));
+        $builder->add($elementFactory->newTextArea('body', 'Body', 'html', 'The HTML body of this mail'));
     }
 
     protected function getConnection(ParametersInterface $configuration): Mailer
@@ -90,5 +129,24 @@ class SmtpSend extends ActionAbstract
         }
 
         return $connection;
+    }
+
+    private function buildBody(RequestInterface $request, string $body): string
+    {
+        $templateContext = [
+            'payload' => $request->getPayload(),
+            'arguments' => $request->getArguments(),
+        ];
+
+        $requestContext = $request->getContext();
+        if ($requestContext instanceof HttpRequestContext) {
+            $templateContext['uriFragments'] = $requestContext->getParameters();
+            $templateContext['query'] = $requestContext->getRequest()->getUri()->getParameters();
+        }
+
+        $loader = new ArrayLoader(['body' => $body]);
+        $twig = new Environment($loader, []);
+
+        return $twig->render('body', $templateContext);
     }
 }
