@@ -22,6 +22,7 @@ namespace Fusio\Adapter\Smtp\Tests\Action;
 
 use Fusio\Adapter\Smtp\Connection\Smtp;
 use Fusio\Adapter\Smtp\Tests\SmtpTestCase;
+use Fusio\Engine\ConfigurableInterface;
 use Fusio\Engine\Form\Builder;
 use Fusio\Engine\Form\Container;
 use Fusio\Engine\Form\Element\Input;
@@ -37,7 +38,7 @@ use Symfony\Component\Mailer\Mailer;
  */
 class SmtpTest extends SmtpTestCase
 {
-    public function testGetConnection()
+    public function testGetConnection(): void
     {
         $connection = $this->getConnectionFactory()->factory(Smtp::class);
 
@@ -50,11 +51,13 @@ class SmtpTest extends SmtpTestCase
         $this->assertInstanceOf(Mailer::class, $smtp);
     }
 
-    public function testConfigure()
+    public function testConfigure(): void
     {
         $connection = $this->getConnectionFactory()->factory(Smtp::class);
         $builder    = new Builder();
         $factory    = $this->getFormElementFactory();
+
+        $this->assertInstanceOf(ConfigurableInterface::class, $connection);
 
         $connection->configure($builder, $factory);
 
